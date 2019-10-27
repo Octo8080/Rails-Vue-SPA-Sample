@@ -1,24 +1,23 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
+sample at Users management App made of Ruby on Rails and Vue.js .
 
 * Ruby version
+ruby-2.5.5
 
-* System dependencies
+* Node version
+v8.12.0
 
-* Configuration
+Execution method
+at Rails
+```
+cd .
+rails s
+```
 
-* Database creation
+at Node
+```
+cd ./front
+npx vue-cli-service build --watch
+```
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
