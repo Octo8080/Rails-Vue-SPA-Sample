@@ -8,15 +8,15 @@ ruby-2.5.5
 * Node version
 v8.12.0
 
-Execution method
+Execution method  
 at Rails
-```
+```bash
 cd .
 rails s
 ```
 
 at Node
-```
+```bash
 cd ./front
 npx vue-cli-service build --watch
 ```
