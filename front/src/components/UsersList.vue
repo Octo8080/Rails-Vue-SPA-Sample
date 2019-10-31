@@ -1,6 +1,22 @@
 <template>
   <div class="UsersList">
-    <h2>USER LIST</h2>
+    <div class="row">
+      <h2>USER LIST</h2>
+      <div v-if="islogon">
+        <button v-on:click="logoff()">LOGOFF</button>
+      </div>
+      <div v-else>
+        <div>
+          <label>ID</label><input type="text" v-model="id">
+        </div>
+        <div>
+          <label>PW</label><input type="password" v-model="password">
+        </div>
+        <div>
+          <button v-on:click="logon()">LOGON</button>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="">Users</div>
     </div>
@@ -37,17 +53,77 @@ export default {
     return {
       users:[],
       addusername:"",
-      sendstate:false
+      sendstate:false,
+      islogon:false,
+      id:"",
+      password:""
     }
   },
   methods: {
+    logon: async function(){
+      console.log("logon")
+
+      self=this
+      await axios.post('/sessions',{
+        sessions:{name:this.id,password:this.password},
+        paramsSerializer:function (params){
+          return qs.stringify(params,{ arrayFormat: 'brackets' })
+        }}
+      )
+      .then(function( result ){
+        console.log(result)
+        self.islogon=true
+      })
+      .catch(function(error){
+        console.log(error)
+      })
+      this.index()
+    },
+    islogin: async function(){
+      console.log("logoff")
+      self=this
+      await axios.post('/sessions/islogin',{
+        //セッション検証
+        withCredentials:true
+        }
+      )
+      .then(function( result ){
+        console.log(result)
+        self.islogon=true
+      })
+      .catch(function(error){
+        console.log(error)
+        self.islogon=false
+      })
+    },
+    logoff: async function(){
+      console.log("logoff")
+      self=this
+      await axios.delete('/sessions',{
+        withCredentials:true
+        }
+      )
+      .then(function( result ){
+        console.log(result)
+        self.islogon=false
+      })
+      .catch(function(error){
+        console.log(error)
+      })
+      this.users.splice(0,this.users.length)
+    },
+    getcookie:function(){
+      console.log("###")
+      console.log(document.cookie);
+      console.log("###")
+    },
     //railsの/userへGET
     index: async function() {
       console.log("Get:/users")
       self=this
-      await axios.get('/users.json').then(function( result ){
+      await axios.get('/users').then(function( result ){
         console.log("[result]",result)
-        self.users = result.data
+        self.users = result.data.users
       })
     },
     //railsの/userへPOST
@@ -69,7 +145,10 @@ export default {
         user:{name:this.addusername},
         paramsSerializer:function (params){
           return qs.stringify(params,{ arrayFormat: 'brackets' })
-        }}
+        },
+        //セッション検証
+        withCredentials:true
+        },
       )
       .then(function( result ){
         console.log(result)
@@ -83,11 +162,14 @@ export default {
       this.index()
     },
   },
-  mounted:function(){
+  mounted:async function(){
     axios.defaults.headers.common = {
     'X-Requested-With': 'XMLHttpRequest',
     'X-CSRF-TOKEN' : document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
-    this.index()
+    await this.islogin()
+    if(this.islogon){
+      this.index()
+    }
   }
 }
 </script>

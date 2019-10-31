@@ -4,8 +4,23 @@ class UsersController < ApplicationController
   # GET /users
   # GET /users.json
   def index
+    puts "[index]:#{current_user}"
     @users = User.all
-    render json: @users
+=begin
+    if current_user !=nil
+      @users = User.all
+      render json: @users
+    else
+      render json: '{"EE":"EE"}'
+    end
+=end
+    respond_to do |format|
+      if current_user !=nil
+        format.json{render :status => 200, :json => { :users=>@users, :state => "Success", :user => current_user.name }.to_json}
+      else
+        format.json{render :status => 401, :json => { :state => "Err", :user =>  ""}.to_json}
+      end
+    end
   end
 
   # GET /users/1
@@ -26,6 +41,12 @@ class UsersController < ApplicationController
   # POST /users.json
   def create
     @user = User.new(user_params)
+
+    if current_user ==nil
+      respond_to do |format|
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end     
+    end
 
     respond_to do |format|
       if @user.save
